@@ -25,4 +25,8 @@ export class UserService {
     public async GetUser(id: string, version: string = null) {
         return this.userModel.findOne({ id: id }).exec();
     }
+
+    public async DelUser(id: string) {
+        return this.userModel.remove({ id: id }).exec();
+    }
 }

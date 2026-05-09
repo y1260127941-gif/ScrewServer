@@ -1,7 +1,8 @@
-import { Controller, Get, Param, Query, Post, Body, Req, HttpCode } from '@nestjs/common';
+import { Controller, Get, Param, Query, Post, Body, Req, HttpCode, UseInterceptors } from '@nestjs/common';
 import { AppService } from './app.service';
 import { RankService } from './rank/rank.service';
 import { UserService } from './user/user.service';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 @Controller()
 export class AppController {
@@ -59,17 +60,25 @@ export class AppController {
   @HttpCode(200)
   @Post('getUserData')
   async _getUserData(@Body('openid') openid: string) {
-    this.user.GetUser(openid);
+    var user = await this.user.GetUser(openid);
+    if (user != null) {
+      return JSON.parse(user.data);
+    } else {
+      return null;
+    }
   }
 
   @HttpCode(200)
   @Post('saveUserData')
-  async _saveUserData(@Body('openid') openid: string) {
-    var user = await this.user.GetUser(openid);
-    if (user != null) {
-      return user.data;
-    } else {
-      return null;
-    }
+  async _saveUserData(@Body('openid') openid: string, @Body('data') data: any) {
+    await this.user.SaveUser(openid, JSON.stringify(data));
+    return { code: 1 };
+  }
+
+  @HttpCode(200)
+  @Post('delUser')
+  async _delUser(@Body('openid') openid: string) {
+    await this.user.DelUser(openid);
+    return { code: 1 };
   }
 }
